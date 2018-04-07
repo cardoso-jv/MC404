@@ -1,0 +1,70 @@
+000 09 105 0B 101  #calc de y = gx
+001 0A 000 21 105  #stor y 0x105
+002 15 000 21 104  #stor k = y/2 0x104
+003 01 105 0C 104  #calc y/k
+004 0A 000 05 104  #calc k + y/k
+005 15 000 21 104  #calc (k+y/k)/2 e stor 0x104
+006 01 102 06 103  #Load I(ciclo) e I-count(I-1) 
+007 21 102 0F 003  #Stor I-1 0x102 e Jump+ 0x003 
+008 01 104 0D 400  #Load 0x104 e Jump 0x400 (Fora do cilo)
+
+
+101 00 00 00 00 0A
+102 00 00 00 00 09
+103 00 00 00 00 01
+#104 k'
+#105 Dado (x)
+
+000 LOAD MQ, M(105)	; MUL M(101)
+001 LOAD MQ			; STOR M(105)
+002 RSH  			; STOR M(104)
+003 LOAD M(105) 	; DIV M(104)
+004 LOAD MQ			; ADD M(104)
+005 RSH 			; STOR M(104)
+006 LOAD M(102)		; SUB M(103)
+007 STOR M(102)		; JUMP+ M(003, 00:19)
+008 LOAD M(104)		; JUMP M(400, 00:19)
+
+
+
+
+.set CODIGO 0x000
+.set Var 0x101
+
+.org CODIGO
+	LOAD MQ, M(dado)
+	MUL M(g)
+	LOAD MQ
+	STOR M(dado)
+	RSH
+	STOR M(k)
+laco:
+	LOAD M(dado)
+	DIV M(k)
+	LOAD MQ
+	ADD M(k)
+	RSH
+	STOR M(k)
+	LOAD M(i)
+	SUB M(count)
+	STOR M(i)
+	JUMP+ M(laco)
+
+	LOAD M(k)
+	JUMP M(0x400)
+
+
+
+.org Var
+g:
+	.word 0x0A
+i:
+	.word 0x09
+count:
+	.word 0x01
+k:
+	.skip 0x01
+dado:
+	.skip 0x01
+
+

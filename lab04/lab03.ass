@@ -1,0 +1,78 @@
+000 01 3FF 06 0FF #Load T 0x3FF e calc T-1(0x0FF)
+001 21 3FF 01 3FD #Stor T-1 0x3FF (Arrumando Número de Ciclos) e LOAD 0x3FD (v¹[i])
+002 13 003 05 0FF #Stor M(003,28:39) e Incremento do Apontador para v¹[i]
+003 21 3FD 09 000 #Stor v¹+1 0x3FD e LOAD MQ(v¹[i])
+004 01 3FE 12 006 #Load 0x3FE (v²[i]) e Stor M(006,08:19)
+005 05 0FF 21 3FE #Incremento no Apontador para v²[i] e Stor v²+1 0x3FE
+006 0B 000 0A 000 #MUL(v²[i]) e LOAD MQ
+007 05 0FE 21 0FE #Soma + v¹[i]*v²[i] e Soma em 0x0FE 
+008 01 3FF 06 0FF #LOAD 0x3FF (Ciclo) e Subtrai 1(count)					
+009 21 3FF 10 001 #STOR Ciclo atualizado em 0x3FF e JUMP+(001,20:39)
+00A 01 0FE 0D 400 #Load soma 0x0FE e JUMP 0x400
+
+
+0FE 00 00 00 00 00 #Soma
+0FF 00 00 00 00 01 #Count
+
+
+
+3FD 00 00 00 00 00 #Apontador V¹
+3FE 00 00 00 00 00 #Apontador V²
+3FF 00 00 00 00 00 #Tam Vetores = T
+
+
+
+000 LOAD M(3FF)  		; SUB M(0FF)
+001 STOR M(3FF) 		; LOAD M(3FD)
+002 STOR M(003, 28:39)	; ADD M(0FF)
+003 STOR M(3FD)			; LOAD MQ, M(000)
+004 LOAD M(3FF)			; STOR M(006, 08:19)
+005 ADD M(0FF)			; STOR M(3FE)
+006 MUL M(000)			; LOAD MQ
+007 ADD M(0FE)			; STOR M(0FE)
+008 LOAD M(3FF)			; SUB M(0FF)
+009 STOR M(3FF)			; JUMP+ M(001, 20:39)
+00A LOAD M(0FE)			; JUMP M(400, 00:19)
+
+
+
+.set CODIGO 0x000
+.set Var 0x020
+.set DADOS 0X3FD
+
+.org CODIGO
+	LOAD M(t)
+	SUB M(count)
+	STOR M(t)
+laco:
+	LOAD M(v1)
+	STA M(f1, 28:39)
+	ADD M(count)
+	STOR M(v1)
+f1:	LOAD MQ, M(000)
+	LOAD M(v2)
+	STA M(f2, 8:19)
+	ADD M(count)
+	STOR M(v2)
+f2:	MUL M(000)
+	LOAD MQ
+	ADD M(soma)
+	STOR M(soma)
+	LOAD M(t)
+	SUB M(count)
+	STOR M(t)
+	JUMP+ M(laco, 20:39)
+fim_de_laco:
+	LOAD M(soma)
+	JUMP M(0x400)
+
+.org Var
+soma:
+	.word 0x00 
+count:
+	.word 0x01
+
+.org DADOS
+v1: .skip 0x01
+v2: .skip 0x01
+t:  .skip 0x01 

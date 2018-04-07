@@ -1,0 +1,30 @@
+# Entre na pasta onde esta o fonte do programa
+
+# Monte o seu ambiente
+source /home/specg12-2/mc404/simulador/set_path_player.sh
+
+# Para compilar e ligar o seu programa (note a diferença no ligador)
+arm-eabi-as -g ra176277.s -o ra176277.o
+arm-eabi-ld ra176277.o -o ra176277 -g --section-start=.iv=0x778005e0 -Ttext=0x77800700 -Tdata=0x77803000 -e 0x778005e0
+
+# Monte a imagem do cartão SD: (note que seu programa eh o SO !!!)
+mksd.sh --so ra176277 --user faz_nada
+
+# Antes de iniciar o simulador, você precisa abrir uma sessão do Player em outro terminal
+source /home/specg12-2/mc404/simulador/set_path_player.sh
+player /home/specg12-1/mc404/simulador/simulador_player/worlds_mc404/simple.cfg
+
+# Abra o simulador armsim_player com suporte ao GDB no primeiro terminal.
+armsim_player --rom=/home/specg12-1/mc404/simulador/simulador_player/bin/dumboot.bin --sd=disk.img -g
+
+# Abra um terceiro terminal e monte o seu ambiente
+source /home/specg12-2/mc404/simulador/set_path_player.sh
+
+# No terceiro terminal, conecte no simulador utilizando o GDB
+arm-eabi-gdb ra176277
+(gdb) target remote localhost:5000       # conecte no simulador
+(gdb) b ra176277.s:<linha>               # substitua <linha> por uma linha dentro de IRQ_HANDLER
+(gdb) c                                  # execute ate encontrar um breakpoint
+(gdb) p *(int)0x77801800                 # quando parar no tratador de interrupcoes, imprima o conteudo do contador
+(gdb) c
+(gdb) ...
